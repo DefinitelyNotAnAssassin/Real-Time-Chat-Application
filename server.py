@@ -189,6 +189,20 @@ async def handle(websocket, path):
 
                     print(f"[server]: creating user: {signupUsernames}")
 
+            elif message_type == "getChatroomUsers": 
+                print("getting chatroom users")
+                chatroom = message_data.get("chatcode", "")
+                chatroom_users = []
+                user_chatroom_record = [json.loads(user_chatrooms) for user_chatrooms in user_chatroom]
+                for uChatroom in user_chatroom_record:
+
+                    if(uChatroom['chatcode'] == chatroom):
+                        chatroom_users.append(json.dumps(uChatroom))
+                user_chatroomEntry = {"chatcode": chatroom, "type": "user-chatroom"}
+                print(chatroom_users)
+                print(user_chatroom_record)
+                await websocket.send(json.dumps(user_chatroomEntry))
+                
             elif message_type == "createChatroom":
                 # create a chatroom and save it to chatroom list
                 chatroomName = message_data.get("chatroomName", "")
@@ -306,10 +320,10 @@ async def handle(websocket, path):
                 if result:
                     for row in result:
                         username = row[2]
-                        print(username)
                         if username:
                             user_chatroom_entry = {"chatcode": chatcode,  "username": username, "type": "toApprove", "isAdmin": isAdmin, "message": "There are users to approve"}
                             await websocket.send(json.dumps(user_chatroom_entry))
+                
                 else:
                     user_chatroom_entry = {"chatcode": chatcode,  "username": username, "type": "toApprove", "isAdmin": isAdmin, "message": "No users to approve"}
                     await websocket.send(json.dumps(user_chatroom_entry))
@@ -320,13 +334,13 @@ async def handle(websocket, path):
                 
                 chatcode = message_data.get("chatcode", "")
                 username = message_data.get("username", "")
-                print(chatcode, username)
+
                 
                 query = f"SELECT * FROM `user_chatroom` WHERE `chatroomID` = '{chatcode}' AND `username` = '{username}' AND `is_approved` = 1"
                 
                 mycursor.execute(query) 
                 result = mycursor.fetchall()
-                
+                RetrieveData()
                 if result: 
                     message = {"chatcode": chatcode,  "username": username, "type": "isAllowed", "message": "Allowed"}
                     await websocket.send(json.dumps(message))
@@ -338,6 +352,7 @@ async def handle(websocket, path):
                 
             
             elif message_type == "getToApprove": 
+              
                 print("getting to approve")
                 chatcode = message_data.get("chatcode", "")
                 username = message_data.get("username", "")
@@ -352,6 +367,7 @@ async def handle(websocket, path):
                 
                 print(result)
                 if (result):
+                    print("admin")
                     isAdmin = True
                     
                 if (not isAdmin):
@@ -359,7 +375,7 @@ async def handle(websocket, path):
                     user_chatroom_entry = {"chatcode": chatcode, "username": username, "type": "toApprove", "isAdmin": isAdmin, "message": "You are not an admin"}
                     await websocket.send(json.dumps(user_chatroom_entry))
 
-                    break
+        
                 
                 else:
                     query = f"SELECT * FROM `user_chatroom` WHERE `chatroomID` = '{chatcode}' AND `is_approved` = 0"
