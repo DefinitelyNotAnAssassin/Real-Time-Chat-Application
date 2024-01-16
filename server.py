@@ -241,7 +241,7 @@ async def handle(websocket, path):
                     websocket.isTransacted = True
                     yourActiveEntry = {"username": loginUsernames, "type": "status"}
                     await broadcast(json.dumps(yourActiveEntry))
-                    activeUsersEntry = {"username": loginUsernames, "type": "status"}
+                    activeUsersEntry = {"username": socketUsername, "type": "status"}
                     active_users.append(json.dumps(activeUsersEntry))
                 else: 
                     print("already transacted")
@@ -259,7 +259,7 @@ async def handle(websocket, path):
                 mycursor.execute("SELECT * FROM `chatrooms`")
 
                 chatroomsquery = mycursor.fetchall()
-                chatroomList = []
+                chatroomList.clear()
                 for chatroomsTuple in chatroomsquery:
                     chatroomID, chatroomName = chatroomsTuple
                     chatroomList.append(json.dumps({"chatcode": chatroomID, "chatname": chatroomName, "type": "chatroom"}))
