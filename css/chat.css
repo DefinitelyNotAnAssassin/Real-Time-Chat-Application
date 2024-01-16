@@ -11,7 +11,9 @@ a, button
     all: unset;
 }
 
-
+#chatroomCodess{
+    margin: 0 auto;
+}
 :root
 {
     --border-color: #afafaf;
@@ -74,6 +76,10 @@ a, button
     padding: 5px;
     width: 100%;
 }
+a {
+    text-decoration: none;
+    color: inherit;
+  }
 
 .profile-picture img 
 {
@@ -179,10 +185,12 @@ a, button
 }
 
 .chatroomListContent p, .activeUserContent p
-{
+{   
+    text-align: center;
     color: #929292;
     font-size: 14px;
     padding: 2px 0px;
+    font-weight: bold;
 }
 
 .icons2
@@ -220,7 +228,7 @@ a, button
 .chatroomContent
 {
     width: 100%;
-    height: calc(100vh - 100px);
+    height: calc(100vh - 138px);
     overflow-y: auto;
 }
 
@@ -251,11 +259,8 @@ a, button
     width: 100%;
     padding: 5px;
     position: fixed;
-    
-    bottom: 1px;
     flex-direction: row;
-    margin-bottom: 30px;
-
+    height: 60px;
 }
 
 .userMsg
@@ -285,6 +290,7 @@ a, button
 .msgInput
 {
     width: 95%;
+    margin-top: 24px;
     height: 30px;
     background-color: #eeeeee;
     border: none;
@@ -641,10 +647,4 @@ span{
     font-size: 12px;
     bottom: 68px;
     position: absolute;
-}
-#login{
-    left: 50px;
-}
-#register{
-    left: 450px;
 }

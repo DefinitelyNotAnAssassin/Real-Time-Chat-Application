@@ -7,7 +7,9 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/chat.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
      <script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"></script>
 </head>
@@ -16,54 +18,139 @@
 
 <div class="background"></div>
 
-<section id = "hero" class="hero">
-    <div class="form-box">
-        <div class="hero-header">
-            Real time chat app
-        </div>
-        <div class="button-box">
-            <button id="loginBtn" type="button" class="toggle-btn active" onclick="login()">Log In</button>
-            <button id="signupBtn" type="button" class="toggle-btn" onclick="register()">Register</button>
-        </div>
-            <form id="login" class="input-group">
-                <p class="icons"><i class='bx bxs-user'></i></p>
-                <input id="login-username" type="text" class="input-field" placeholder="Username" required>
-                <p class="icons"><i class='bx bxs-lock-alt' ></i></p>
-                <input id="login-password" type="password" class="input-field" placeholder="Password" required>
-                <button type="submit" class="submit-btn">Log In</button>
-            </form>
-            <form id="register"class="input-group">
-                <p class="icons"><i class='bx bxs-user'></i></p>
-                <input id = "signup-username" type="text" class="input-field" placeholder="Username" required>
-                <p class="icons"><i class='bx bxs-lock-alt' ></i></p>
-                <input id = "signup-password" type="password" class="input-field" placeholder="Password" required>
-                <p class="icons"><i class='bx bxs-lock-alt' ></i></p>
-                <input id = "signup-rpt-password" type="password" class="input-field" placeholder="Repeat password" required>
-                <button type="submit" class="submit-btn">Register</button>
-            </form>
-    </div>
-</section>
 
-<section id="chat" class="content">
+<section id = "hero" class="wrapper">
   
 
+    <div  class="form login">
+      <header>Login</header>
+      <form  id="login"action="#">
+        <input id="login-username" type="text" placeholder="Username" required />
+        <input id="login-password" type="password" placeholder="Password" required />
+        <a href="#">Forgot password?</a>
+        <input id="loginBtn" type="submit" value="Login" />
+      </form>
+    </div>
+
+    <div class="form signup">
+        <header>Signup</header>
+        <form id="register"  action="#">
+          <input  id = "signup-username"  type="text" placeholder="Username" required />
+          <input  id = "signup-password"  type="password" placeholder="Password" required />
+          <input  id = "signup-rpt-password" type="password" placeholder="Confirm Password" required />
+          <div class="checkbox">
+            <input type="checkbox" id="signupCheck" />
+            <label for="signupCheck">I accept all terms & conditions</label>
+          </div>
+          <input id="signupBtn"  type="submit" value="Signup" />
+        </form>
+      </div>
+
+    <script>
+      const wrapper = document.querySelector(".wrapper"),
+        signupHeader = document.querySelector(".signup header"),
+        loginHeader = document.querySelector(".login header");
+       wrapper.classList.add("active")
+      loginHeader.addEventListener("click", () => {
+        wrapper.classList.add("active");
+      });
+      signupHeader.addEventListener("click", () => {
+        wrapper.classList.remove("active");
+      });
+    </script>
+  </section>
+
+
+
+<section id="chat" class="content">
+  <!-- Button trigger modal -->
+
+  
+  <!-- Create Room Modal -->
+  <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <h1>Add Chatroom</h1>
+            <form id="AddChatroom" method="POST" action="">
+                    <div class="form-field">
+                        <label>Chatroom name</label>
+                        <input id="ChatroomName" type="text" name="taskName" placeholder="Chatroom name">
+                    </div>
+                </div>
+                <div class="addWarning-text">
+                    <p id="addWarning"></p>
+                </div>
+                <div class="form-button">
+                    <input id="addChatroomBtn" type="submit" name="AddChatroom" value="Create">
+                    <input type="button" value="Cancel" onclick="CloseAddChatroom()">        
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+    <!-- Join Room Modal -->
+    <div class="modal fade" id="exampleModal2" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h1>Join Chatroom</h1>
+                <form id="joinChatroom" method="POST" action="">
+                        <div class="form-field">
+                            <label>Chatroom code</label>
+                            <input id="chatroomCode" type="text" name="taskName" placeholder="Chatroom code">
+                        </div>
+                    </div>
+                    <div class="addWarning-text">
+                        <p id="joinWarning"></p>
+                    </div>
+                    <div class="form-button">
+                        <input id="" type="submit" name="AddChatroom" value="Join">
+                        <input type="button" value="Cancel" onclick="CloseJoinChatroom()">        
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-primary">Save changes</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    
   
 
     
     <div class="chatLog">
         <div style="position: absolute; width: 100vw; height: 40%; margin-top: 10vh;">
             
-            <div class="addChatIcon" onclick="OpenAddChatroom()">
-                <div class="btn" style = "margin-top: 10vh; margin-bottom: 10vh;">
+            <div class="addChatIcon">
+                <div class="btn" data-bs-toggle="modal" data-bs-target="#exampleModal" style = "margin-top: 10vh; margin-bottom: 10vh;">
                     Create Room
                 </div>
             </div>
-            <div class="joinChatIcon" onclick="OpenJoinChatroom()">
-                <div class="btn" style = "margin-bottom: 10vh;">
+            <div class="joinChatIcon">
+                <div class="btn" data-bs-toggle="modal" data-bs-target="#exampleModal2" style = "margin-bottom: 10vh;">
                     Join Chatroom
                 </div>
             </div>
-            <div class="chatroomList" id="chatroomList" style="overflow-y: auto; height: 30vh;">
+            <div class="chatroomList" id="chatroomList" style="overflow-y: auto; height: 30vh; width: 100vw; display: flex; justify-content: center; flex-wrap: wrap; ">
                 
             </div>  
         </div>
@@ -85,7 +172,7 @@
             </div> -->
         </div>
         <div class="chatMsg" style = "display: none;">
-            <input class="msgInput" placeholder="Aa" id="msgInput">
+            <input class="msgInput form-control" placeholder="Aa" autofocus id="msgInput">
             <div class="msgSend" onclick="send()"><i class='bx bxs-send'></i></div>
         </div>
     </div>
@@ -104,39 +191,11 @@
 </section>
 
     <section id="AddChatroomForm" class="popup-form">
-        <h1>Add Chatroom</h1>
-        <form id="AddChatroom" method="POST" action="">
-                <div class="form-field">
-                    <label>Chatroom name</label>
-                    <input id="ChatroomName" type="text" name="taskName" placeholder="Chatroom name">
-                </div>
-            </div>
-            <div class="addWarning-text">
-                <p id="addWarning"></p>
-            </div>
-            <div class="form-button">
-                <input id="addChatroomBtn" type="submit" name="AddChatroom" value="Create">
-                <input type="button" value="Cancel" onclick="CloseAddChatroom()">        
-            </div>
-        </form>
+       
     </section>
 
     <section id="joinChatroomForm" class="popup-form">
-        <h1>Join Chatroom</h1>
-        <form id="joinChatroom" method="POST" action="">
-                <div class="form-field">
-                    <label>Chatroom code</label>
-                    <input id="chatroomCode" type="text" name="taskName" placeholder="Chatroom code">
-                </div>
-            </div>
-            <div class="addWarning-text">
-                <p id="joinWarning"></p>
-            </div>
-            <div class="form-button">
-                <input id="" type="submit" name="AddChatroom" value="Join">
-                <input type="button" value="Cancel" onclick="CloseJoinChatroom()">        
-            </div>
-        </form>
+        
     </section>
 
     <section id="add-chatroom" class="add-chatroom-popout">
@@ -146,7 +205,7 @@
         </div>
     </section>
 
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
 </body>
 </html>
 
@@ -174,8 +233,8 @@
         if(messageType == "newChatroom")
         {
             var chatroomCodePrompt = document.getElementById("chatroomCodePrompt")
-            chatroomCodePrompt.textContent = "Your chatroom code is " + messageRecv.chatcode
-            checkSuccess()
+            alert("Your chatroom code is " + messageRecv.chatcode)
+    
         }
        
         else if (messageType == "user-chatroom")
@@ -194,6 +253,12 @@
         else if (messageType == "alert")
         {
             alert(messageRecv.message)
+        }
+        else if (messageType == "update") { 
+           
+            updateUsers() 
+            updateChatrooms() 
+            updateMessages()
         }
         else if (messageType == "status")   
         {
@@ -215,6 +280,8 @@
             // update message
             storedChatLog.push(messageRecv)
             updateMessages()
+            const chatLog = document.getElementById("chatLog")
+            
         }
 
         
@@ -337,28 +404,39 @@
     //update chatroom list
     function updateChatrooms() {
         chatroomList.innerHTML = '';
+        
+        // Sort chatrooms based on active status
+        chatrooms.sort((a, b) => {
+            const aIsActive = isUserActive(a);
+            const bIsActive = isUserActive(b);
+            
+            if (aIsActive && !bIsActive) {
+                return -1; // a comes first
+            } else if (!aIsActive && bIsActive) {
+                return 1; // b comes first
+            } else {
+                return 0; // no change in order
+            }
+        });
+        
         chatrooms.forEach(rooms => {
-            if(rooms.username == username)
-            {
+            if (rooms.username == username) {
                 const room = document.createElement('a');
                 room.classList.add("chatroomListContent")
                 room.href = "room.html?chatname=" + rooms.chatname + "&chatcode=" + rooms.chatcode + "&username=" + username
-              
+                room.style.textDecoration = "none"
+                const roomp = document.createElement('p')
+                roomp.textContent = rooms.chatname
+                room.appendChild(roomp)
 
-
-                const roomh4= document.createElement('h4')
-                roomh4.textContent = rooms.chatname
-                room.appendChild(roomh4)
-                
-                const roomP= document.createElement('p')
+                const roomP = document.createElement('p')
 
                 var isSomeoneActive = false
                 chatrooms.forEach(user_rooms => {
-                    if(rooms.chatcode == user_rooms.chatcode){
-                        if (user_rooms.username != username){
-                            // alert("same" + rooms.chatcode + " " + user_rooms.chatcode + "in " + user_rooms.username)
+                    if (rooms.chatcode == user_rooms.chatcode) {
+                        if (user_rooms.username != username) {
                             userStatus.forEach(user_status => {
-                                if(user_rooms.username == user_status.username){
+                                if (user_rooms.username == user_status.username) {
                                     isSomeoneActive = true
                                 }
                             })
@@ -366,23 +444,32 @@
                     }
                 })
 
-                if(!isSomeoneActive){
-                    // roomp.classList.add("aaaaa")
+                if (!isSomeoneActive) {
                     roomP.textContent = "Status: Inactive";
-                }
-                else{
-                    // roomp.classList.add("aaaaa")
+                } else {
                     roomP.textContent = "Status: Active";
                 }
-                
 
                 room.appendChild(roomP)
-                
+
                 chatroomList.appendChild(room);
             }
         });
     }
 
+    function isUserActive(user) {
+        if (user.username == username) {
+            return true;
+        }
+
+        for (let i = 0; i < userStatus.length; i++) {
+            if (user.username == userStatus[i].username) {
+                return true;
+            }
+        }
+
+        return false;
+    }
     //send message
     const sendMessage = document.getElementById('sendbtn');
     const messageInput = document.getElementById('msgInput');
@@ -404,7 +491,7 @@
         if (message.length > 0)
         {
             messageInput.value = "";
-
+            console.log(username)
             JsonMessage = {"chatroom": currentChatroom, "username": username, "message": message, "type": "message"};
             JsonMessage = JSON.stringify(JsonMessage)
             socket.send(JsonMessage);   
@@ -499,8 +586,7 @@
         loginUsername.value = ""
         loginPassword.value = ""
 
-        x.style.left = "-400px";
-        y.style.left = "50px";
+
         loginBtn.classList.remove("active")
         signupBtn.classList.add("active")
     }
@@ -509,8 +595,6 @@
         signupPassword.value = ""
         signupRptPassword.value = ""
 
-        x.style.left = "50px";
-        y.style.left = "450px";
         loginBtn.classList.add("active")
         signupBtn.classList.remove("active")
     }

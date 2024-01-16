@@ -19,12 +19,25 @@
 
 
 <section id="chat" class="content">
-  
+    <div class="chatrooms">
+        <div class="chatroomHeader">
+            <h3>Chatrooms</h3>
+        </div>
+        <div class="chatroomList" id="chatroomList">
+            <!--<div class="chatroomListContent" onclick="changeChatroom(1, 'Chatroom 1')">
+                <h4>Chatroom 1</h4>
+                <p>Status: Inactive</p>
+            </div> -->
+        </div>
+    </div>
     <div class="chatLog">
     
         <div class="chatHeader">
-            <div id = "toApprove"></div>
-            <h3 class="chatroomNamess">
+            <div class="">
+                <button onclick = "leaveRoom()" type = "submit" style = "margin-left: 10px; cursor: pointer;"><svg height="50px" width="30px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 304.588 304.588" xml:space="preserve" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g> <g> <g> <polygon style="fill:#010002;" points="134.921,34.204 134.921,54.399 284.398,54.399 284.398,250.183 134.921,250.183 134.921,270.384 304.588,270.384 304.588,34.204 "></polygon> </g> <g> <polygon style="fill:#010002;" points="150.27,223.581 166.615,239.931 254.26,152.286 166.615,64.651 150.27,80.979 210.013,140.733 0,140.733 0,163.838 210.008,163.838 "></polygon> </g> </g> </g> </g></svg></button>
+            </div>
+           
+            <h3 class="chatroomNames">
                 <p id="chatroomName">Real Time Chat Application</p>
                 <p class= "aaa" id="chatroomCodess"></p>
             </h3>
@@ -43,7 +56,7 @@
             </div> -->
         </div>
         <div class="chatMsg">
-            <input class="msgInput" placeholder="Aa" id="msgInput">
+            <input class="msgInput form-control" placeholder="Aa" id="msgInput">
             <div class="msgSend" onclick="send()"><i class='bx bxs-send'></i></div>
         </div>
     </div>
@@ -143,7 +156,7 @@
     setTimeout(function(){ 
         console.log("going down")
         chatLog.scrollTop = chatLog.scrollHeight;
-    }, 200);
+    }, 500);
 
 
     changeChatroom(currentChatroom, currentChatroomName)
@@ -163,17 +176,39 @@
         {
             alert(messageRecv.message)
         }
+        else if (messageType == "leaveRoom")
+        {
+            console.log("Someone has left")
+            if (messageRecv.username == username){
+                alert("You have been removed from the chatroom")
+                window.location.href = "chat.html"
+            }
+            else{
+                alert(messageRecv.username + " has left the chatroom")
+            }
+            userStatus = userStatus.filter(function(chatroom){
+                chatroom.username !== messageType.username
+            })
+            updateUsers()
+            updateChatrooms()
+        }
+        else if (messageType == "createChatroom" || messageType == "joinChatroom")
+        {
+            chatrooms.push(messageRecv)
+            updateChatrooms()
+        }
         else if (messageType == "status")
         {
             userStatus.push(messageRecv)
             updateUsers()
-            console.log(userStatus)
+            updateChatrooms()
         }
         else if (messageType == "user-chatroom")
         {
             console.log("received")
-            
             chatrooms.push(messageRecv)
+            updateUsers()
+            updateChatrooms()
           
         }
 
@@ -183,6 +218,7 @@
                 chatroom.username !== messageType.username
             })
             updateUsers()
+            updateChatrooms()
         }
         else if (messageType == "isAllowed"){ 
             if(messageRecv.message == "Allowed"){
@@ -237,6 +273,7 @@
             // update message
             storedChatLog.push(messageRecv)
             updateMessages()
+            chatLog.scrollTop = chatLog.scrollHeight;
         } 
     });
 
@@ -299,7 +336,7 @@
 
         currentChatroom = chatroomCode
         chatroom.innerHTML = chatroomName 
-        chatroomCode11.innerHTML = " - " + chatroomCode 
+        chatroomCode11.innerHTML = `${chatroomCode} `
         console.log(userStatus.length)
         if (userStatus.length == 0){ 
             console.log("ping")
@@ -418,9 +455,14 @@
         })
     }
     //update chatroom list
+    const chatroomListContent = document.getElementById("chatroomList")
     function updateChatrooms() {
-       
+        // remove duplicate chatrooms
+
+        chatroomList.innerHTML = ""
+
         chatrooms.forEach(rooms => {
+
             if(rooms.username == username)
             {
                 const room = document.createElement('div');
@@ -460,7 +502,7 @@
                 
 
                 room.appendChild(roomP)
-                
+                chatroomList.append(room)
             }
         });
     }
@@ -486,11 +528,17 @@
         if (message.length > 0)
         {
             messageInput.value = "";
-
             JsonMessage = {"chatroom": currentChatroom, "username": username, "message": message, "type": "message"};
             JsonMessage = JSON.stringify(JsonMessage)
             socket.send(JsonMessage);   
         }
+
+
+    }
+
+    function leaveRoom(){
+        JsonMessage = {"chatcode": currentChatroom, "username": username, "type": "leaveRoom"};
+        socket.send(JSON.stringify(JsonMessage))
     }
 
     // open add chatroom

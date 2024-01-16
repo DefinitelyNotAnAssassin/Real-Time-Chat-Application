@@ -100,7 +100,8 @@ async def handle(websocket, path):
                 currentMessage = message_data.get("message", "")
 
                 # save message to database
-                data = (currentChatroom, socketUsername, currentMessage)
+                data = (currentChatroom, message_data.get("username", ""), currentMessage)
+            
                 mycursor.execute("INSERT INTO `messages` (`chatroomID`, `username`, `message`) VALUES (%s, %s, %s)", data)
                 
                 message_history.append(message)
@@ -121,7 +122,7 @@ async def handle(websocket, path):
                         # check password 
                         if(loginPassword == user['password']):
                             serverMessage = {"username": loginUsernames, "type": "login"}  
-
+                            
                             socketUsername = loginUsernames
                             
                             await websocket.send(json.dumps(serverMessage))
@@ -238,7 +239,7 @@ async def handle(websocket, path):
 
                  
                     websocket.isTransacted = True
-                    yourActiveEntry = {"username": socketUsername, "type": "status"}
+                    yourActiveEntry = {"username": loginUsernames, "type": "status"}
                     await broadcast(json.dumps(yourActiveEntry))
                     activeUsersEntry = {"username": loginUsernames, "type": "status"}
                     active_users.append(json.dumps(activeUsersEntry))
@@ -246,8 +247,27 @@ async def handle(websocket, path):
                     print("already transacted")
                 
 
-                
+            elif message_type == "leaveRoom": 
+                print(message_data)
+                chatroomCode =  message_data.get("chatcode", "")
+                username = message_data.get("username", "")
+                print(chatroomCode, username)
+                sql = f"DELETE FROM `user_chatroom` WHERE `chatroomID` = '{chatroomCode}' AND `username` = '{username}'"
+                mycursor.execute(sql)
+                print(sql)
+                print("deleted")
+                mycursor.execute("SELECT * FROM `chatrooms`")
 
+                chatroomsquery = mycursor.fetchall()
+                chatroomList = []
+                for chatroomsTuple in chatroomsquery:
+                    chatroomID, chatroomName = chatroomsTuple
+                    chatroomList.append(json.dumps({"chatcode": chatroomID, "chatname": chatroomName, "type": "chatroom"}))
+                send_all_chatroom(websocket, chatroomList)
+                # remove the user from the chatroom
+                user_chatroom_entry = {"chatcode": chatroomCode,  "username": username, "type": "leaveRoom"}
+                await websocket.send(json.dumps(user_chatroom_entry))    
+                await websocket.send(json.dumps({"type": "update"}))
                 
                 
             elif message_type == "joinChatroom":
@@ -452,7 +472,7 @@ async def send_all_messages(client, history = message_history):
     for past_message in history:
         await client.send(past_message)
 
-async def send_all_chatroom(client):
+async def send_all_chatroom(client, chatrooms = chatroomList):
     for chatrooms in user_chatroom:
         await client.send(chatrooms)
 
