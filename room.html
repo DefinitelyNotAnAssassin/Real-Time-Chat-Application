@@ -126,6 +126,7 @@
     var storedChatLog = []
     var chatrooms = []
     var userStatus = []
+
     const chatroomCode11 = document.getElementById("chatroomCodess")
     const chatLog = document.getElementById("chatLog")
     const chatroomList = document.getElementById("chatroomList")
@@ -139,10 +140,20 @@
     var username = urlParams.get('username');
     console.log(currentChatroomName.toString() + " " + currentChatroom.toString())
 
+    setTimeout(function(){ 
+        console.log("going down")
+        chatLog.scrollTop = chatLog.scrollHeight;
+    }, 200);
+
 
     changeChatroom(currentChatroom, currentChatroomName)
     var start = false;
     //handles message from the server   
+
+    socket.addEventListener('disconnect', function (event) {
+        alert("Disconnected from server")
+      
+    });
     socket.addEventListener('message', function (event) {
         var messageRecv = JSON.parse(event.data)
 
@@ -161,9 +172,9 @@
         else if (messageType == "user-chatroom")
         {
             console.log("received")
+            
             chatrooms.push(messageRecv)
-   
-            updateUsers()
+          
         }
 
         else if (messageType == "removeActive")
@@ -289,6 +300,24 @@
         currentChatroom = chatroomCode
         chatroom.innerHTML = chatroomName 
         chatroomCode11.innerHTML = " - " + chatroomCode 
+        console.log(userStatus.length)
+        if (userStatus.length == 0){ 
+            console.log("ping")
+            JsonMessage3 = {"username": username,  "chatcode" : currentChatroom, "type": "getChatroomUsers"}
+            JsonMessage3 = JSON.stringify(JsonMessage3)
+            if (socket.readyState === WebSocket.OPEN) {
+                socket.send(JsonMessage3);
+            } else {
+                console.log('WebSocket is not open. Wait for it to open and then resend the message.');
+                // You could set up an event listener here to resend the message when the socket opens
+                socket.addEventListener('open', function (event) {
+                    socket.send(JsonMessage3);
+    
+                });
+             
+            }
+           
+        }
         updateUsers()
         updateMessages()
       
@@ -344,28 +373,12 @@
                 }
             }
         });
+        
     }
 
    
     function updateUsers() {
-        console.log(chatrooms.length)
-        if (chatrooms.length == 0){ 
-            console.log("ping")
-            JsonMessage3 = {"username": username,  "chatcode" : currentChatroom, "type": "getChatroomUsers"}
-            JsonMessage3 = JSON.stringify(JsonMessage3)
-            if (socket.readyState === WebSocket.OPEN) {
-                socket.send(JsonMessage3);
-            } else {
-                console.log('WebSocket is not open. Wait for it to open and then resend the message.');
-                // You could set up an event listener here to resend the message when the socket opens
-                socket.addEventListener('open', function (event) {
-                    socket.send(JsonMessage3);
-    
-                });
-             
-            }
-           
-        }
+
         userList.innerHTML = ""
         chatrooms.forEach(users => {
             if(currentChatroom == users.chatcode)

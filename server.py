@@ -54,6 +54,7 @@ def RetrieveData():
     user_chatroom_query = mycursor.fetchall()
 
     for user_chatroom_tuple in user_chatroom_query:
+        print(len(user_chatroom))
         chatroomID, chatroomName, username, isApproved, isAdmin = user_chatroom_tuple
         user_chatroom.append(json.dumps({"chatcode": chatroomID,  "chatname": chatroomName,  "username": username, "type": "user-chatroom"}))
     print("[server]: user_chatroom retrieved")
@@ -88,6 +89,7 @@ async def handle(websocket, path):
     clients.add(websocket)
 
     socketUsername = ""
+    websocket.isTransacted = False
     try:
         async for message in websocket:
             message_data = json.loads(message)
@@ -217,21 +219,36 @@ async def handle(websocket, path):
                 
             elif message_type == "getChatroomUsers": 
                  # send all past messages
-                loginUsernames = message_data.get("username", "")
-                await send_all_messages(websocket)
+                if websocket.isTransacted == False:
+                
+                    mycursor.execute("SELECT * FROM `messages`")
+                    messagequery = mycursor.fetchall()
+                    new_message_history = []
+                    for messagesTuple in messagequery:
+                        chatID, chatroomID, username, message = messagesTuple
+                        new_message_history.append(json.dumps({"chatroom": chatroomID, "username": username, "message": message, "type": "message"}))
+                    print("[server]: current messages retrieved")
+                    message_history = new_message_history
+                    
+                    loginUsernames = message_data.get("username", "")
+          
+                    await send_all_chatroom(websocket)
+                    await send_all_active(websocket)
+                    await send_all_messages(websocket, new_message_history)
 
-                # send all user-chatroom connection
-                await send_all_chatroom(websocket)
+                 
+                    websocket.isTransacted = True
+                    yourActiveEntry = {"username": socketUsername, "type": "status"}
+                    await broadcast(json.dumps(yourActiveEntry))
+                    activeUsersEntry = {"username": loginUsernames, "type": "status"}
+                    active_users.append(json.dumps(activeUsersEntry))
+                else: 
+                    print("already transacted")
+                
 
-                # send all current active users
-                await send_all_active(websocket)
+                
 
-                # send message to other user that you're online
-                yourActiveEntry = {"username": socketUsername, "type": "status"}
-                await broadcast(json.dumps(yourActiveEntry))
-
-                activeUsersEntry = {"username": loginUsernames, "type": "status"}
-                active_users.append(json.dumps(activeUsersEntry))
+                
                 
             elif message_type == "joinChatroom":
                 chatroomCode =  message_data.get("chatcode", "")
@@ -345,7 +362,7 @@ async def handle(websocket, path):
                 
                 mycursor.execute(query) 
                 result = mycursor.fetchall()
-                RetrieveData()
+            
                 if result: 
                     message = {"chatcode": chatcode,  "username": username, "type": "isAllowed", "message": "Allowed"}
                     await websocket.send(json.dumps(message))
@@ -431,8 +448,8 @@ async def remove_active_status(username):
 
     print(f"current users after logging out: {active_users}")
 
-async def send_all_messages(client):
-    for past_message in message_history:
+async def send_all_messages(client, history = message_history):
+    for past_message in history:
         await client.send(past_message)
 
 async def send_all_chatroom(client):
