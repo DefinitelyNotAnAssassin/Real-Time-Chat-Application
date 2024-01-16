@@ -92,7 +92,7 @@
 
     <div class="userList" id="activeUserList">
         <div class="userListHeader">
-            <h3>Users</h3>
+            <h3>User Request</h3>
         </div>
         <div class="activeUserList" id="userList">
             <!--<div class="chatroomListContent" onclick="changeChatroom(1, 'Chatroom 1')">
@@ -177,6 +177,7 @@
             chatroomCodePrompt.textContent = "Your chatroom code is " + messageRecv.chatcode
             checkSuccess()
         }
+       
         else if (messageType == "user-chatroom")
         {
             chatrooms.push(messageRecv)
@@ -194,7 +195,7 @@
         {
             alert(messageRecv.message)
         }
-        else if (messageType == "status")
+        else if (messageType == "status")   
         {
             userStatus.push(messageRecv)
             updateUsers()
@@ -339,11 +340,10 @@
         chatrooms.forEach(rooms => {
             if(rooms.username == username)
             {
-                const room = document.createElement('div');
+                const room = document.createElement('a');
                 room.classList.add("chatroomListContent")
-                room.onclick = function () {
-                    changeChatroom(rooms.chatcode, rooms.chatname)
-                }
+                room.href = "room.html?chatname=" + rooms.chatname + "&chatcode=" + rooms.chatcode + "&username=" + username
+
 
                 const roomh4= document.createElement('h4')
                 roomh4.textContent = rooms.chatname

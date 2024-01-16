@@ -54,7 +54,7 @@ def RetrieveData():
     user_chatroom_query = mycursor.fetchall()
 
     for user_chatroom_tuple in user_chatroom_query:
-        chatroomID, chatroomName, username = user_chatroom_tuple
+        chatroomID, chatroomName, username, isApproved, isAdmin = user_chatroom_tuple
         user_chatroom.append(json.dumps({"chatcode": chatroomID,  "chatname": chatroomName,  "username": username, "type": "user-chatroom"}))
     print("[server]: user_chatroom retrieved")
 
@@ -206,7 +206,7 @@ async def handle(websocket, path):
 
                 # save the user_chatroom to database
                 data = (random_numbers, chatroomName, socketUsername)
-                mycursor.execute("INSERT INTO `user_chatroom` (`chatroomID`, `chatroomName`, `username`) VALUES (%s, %s, %s)", data)
+                mycursor.execute("INSERT INTO `user_chatroom` (`chatroomID`, `chatroomName`, `username`, `is_approved`, `role`) VALUES (%s, %s, %s, 1, 'admin')", data)
 
                 # send the chatroom to the creator
                 newChatroomMessage = {"chatcode": random_numbers, "chatname": chatroomName , "type": "newChatroom"}
@@ -218,14 +218,12 @@ async def handle(websocket, path):
                 chatroomCode =  message_data.get("chatcode", "")
 
                 chatcode_exists = False
-
+                isAdmin = False
                 isAlreadyJoined = False
-
+                isApproved = False
                 chatroomName = ""
 
                 chatrooms = [json.loads(chatroom) for chatroom in chatroomList]
-                print(chatrooms)
-
                 print(chatroomCode)
                 for chatroom in chatrooms:  
                     if (chatroomCode == str(chatroom['chatcode'])):
@@ -236,7 +234,7 @@ async def handle(websocket, path):
 
                 if chatcode_exists:
                     for uChatroom in user_chatroom_record:
-                        print(uChatroom['chatname'] == chatroomName)
+                        
                         if(uChatroom['chatname'] == chatroomName and uChatroom['username'] == socketUsername):
                             isAlreadyJoined = True
                         
@@ -246,13 +244,41 @@ async def handle(websocket, path):
 
                     else:
                         print("Chatcode exists in the list.")
+                        
+                        # check if the user is approved 
+                        
+                        query = f"SELECT * FROM `user_chatroom` WHERE `chatroomID` = 'd{chatroomCode}' AND `username` = '{socketUsername}'"
+                    
+                        mycursor.execute(query) 
+                        result = mycursor.fetchall()
+                        
+                        # check if the user is approved 
+                        
+                        for row in result:
+                            if(row[3] == 1):
+                                isApproved = True
+                                break
+                            if (row[4] == "admin"):
+                                isAdmin = True
+                                isApproved = True
+                                break
                         user_chatroomEntry = {"chatcode": chatroomCode,  "chatname": chatroomName,  "username": socketUsername, "type": "user-chatroom"}
+                        print(chatroomName, socketUsername)
                         user_chatroom.append(json.dumps(user_chatroomEntry))
                         print(user_chatroom)     
 
                         # save to database
                         data = (chatroomCode, chatroomName, socketUsername)
+
                         mycursor.execute("INSERT INTO `user_chatroom` (`chatroomID`, `chatroomName`, `username`) VALUES (%s, %s, %s)", data)
+                        
+                        
+                        if (not isApproved):
+                            print("...not approved")
+                            newChatroomMessage = {"type": "alert", "message": "Waiting for approval to join this chatroom"}
+                            await websocket.send(json.dumps(newChatroomMessage))
+                            break
+                        
                         
                         await broadcast(json.dumps(user_chatroomEntry))
 
@@ -264,6 +290,93 @@ async def handle(websocket, path):
             elif message_type == "logout":
                 print("logging out")
                 await websocket.close()
+                
+            elif message_type == "approve":
+                print("approving user")
+                username = message_data.get("username", "")
+                chatcode = message_data.get("chatcode", "")
+
+                # update the database
+                query = f"UPDATE `user_chatroom` SET `is_approved`= 1 WHERE `chatroomID` = '{chatcode}' AND `username` = '{username}'"
+                mycursor.execute(query)
+                
+                query = f"SELECT * FROM `user_chatroom` WHERE `chatroomID` = '{chatcode}' AND `is_approved` = 0"
+                mycursor.execute(query)
+                result = mycursor.fetchall()
+                if result:
+                    for row in result:
+                        username = row[2]
+                        print(username)
+                        if username:
+                            user_chatroom_entry = {"chatcode": chatcode,  "username": username, "type": "toApprove", "isAdmin": isAdmin, "message": "There are users to approve"}
+                            await websocket.send(json.dumps(user_chatroom_entry))
+                else:
+                    user_chatroom_entry = {"chatcode": chatcode,  "username": username, "type": "toApprove", "isAdmin": isAdmin, "message": "No users to approve"}
+                    await websocket.send(json.dumps(user_chatroom_entry))
+             
+
+            elif message_type == "isAllowed":
+                # check if the user is allowed to join the chatroom 
+                
+                chatcode = message_data.get("chatcode", "")
+                username = message_data.get("username", "")
+                print(chatcode, username)
+                
+                query = f"SELECT * FROM `user_chatroom` WHERE `chatroomID` = '{chatcode}' AND `username` = '{username}' AND `is_approved` = 1"
+                
+                mycursor.execute(query) 
+                result = mycursor.fetchall()
+                
+                if result: 
+                    message = {"chatcode": chatcode,  "username": username, "type": "isAllowed", "message": "Allowed"}
+                    await websocket.send(json.dumps(message))
+                else:
+                    message = {"chatcode": chatcode,  "username": username, "type": "isAllowed", "message": "Not Allowed"}
+                    await websocket.send(json.dumps(message))
+                    
+                
+                
+            
+            elif message_type == "getToApprove": 
+                print("getting to approve")
+                chatcode = message_data.get("chatcode", "")
+                username = message_data.get("username", "")
+                print(chatcode, username)
+                # get all the users that are not approved
+                isAdmin = False
+                
+                checkAdmin = f"SELECT * FROM `user_chatroom` WHERE `chatroomID` = '{chatcode}' AND `username` = '{username}' AND `role` = 'admin'"
+                print(checkAdmin)
+                mycursor.execute(checkAdmin)
+                result = mycursor.fetchall()
+                
+                print(result)
+                if (result):
+                    isAdmin = True
+                    
+                if (not isAdmin):
+                    print("not admin")
+                    user_chatroom_entry = {"chatcode": chatcode, "username": username, "type": "toApprove", "isAdmin": isAdmin, "message": "You are not an admin"}
+                    await websocket.send(json.dumps(user_chatroom_entry))
+
+                    break
+                
+                else:
+                    query = f"SELECT * FROM `user_chatroom` WHERE `chatroomID` = '{chatcode}' AND `is_approved` = 0"
+                    mycursor.execute(query)
+                    result = mycursor.fetchall()
+
+                    if result:
+                        for row in result:
+                            username = row[2]
+                            print(username)
+                            if username:
+                                user_chatroom_entry = {"chatcode": chatcode,  "username": username, "type": "toApprove", "isAdmin": isAdmin, "message": "There are users to approve"}
+                                await websocket.send(json.dumps(user_chatroom_entry))
+                    else:
+                        user_chatroom_entry = {"chatcode": chatcode,  "username": username, "type": "toApprove", "isAdmin": isAdmin, "message": "No users to approve"}
+                        await websocket.send(json.dumps(user_chatroom_entry))
+                     
 
     finally:
         clients.remove(websocket)

@@ -20,20 +20,19 @@
 
 <section id="chat" class="content">
   
-
-  
-
-    
     <div class="chatLog">
     
         <div class="chatHeader">
+            <div id = "toApprove"></div>
             <h3 class="chatroomNamess">
                 <p id="chatroomName">Real Time Chat Application</p>
                 <p class= "aaa" id="chatroomCodess"></p>
             </h3>
             <p class="icons2" id="showUsers"><i class='bx bx-dots-vertical-rounded'></i></p>
         </div>
+        <div id="toApprove"></div>
         <div class="chatroomContent" id="chatLog">
+            
             <!--<div class="userMsg">
                 <div class="name">
                     <p>You</p>
@@ -51,8 +50,15 @@
 
     <div class="userList" id="activeUserList">
         <div class="userListHeader">
-            <h3>Users</h3>
+            <h3 id = "titleTag">Users</h3>
         </div>
+        <div class="activeUserList" id="approveList">
+            <!--<div class="chatroomListContent" onclick="changeChatroom(1, 'Chatroom 1')">
+                <h4>Chatroom 1</h4>
+                <p>Status: Inactive</p>
+            </div> -->
+        </div>
+
         <div class="activeUserList" id="userList">
             <!--<div class="chatroomListContent" onclick="changeChatroom(1, 'Chatroom 1')">
                 <h4>Chatroom 1</h4>
@@ -113,6 +119,7 @@
 <script>
     const socket = new WebSocket('ws://localhost:8080');
     const userList = document.getElementById("userList")
+    const isAdmin = false;
     var storedChatLog = []
     var chatrooms = []
     var userStatus = []
@@ -129,6 +136,7 @@
     var username = urlParams.get('username');
     console.log(currentChatroomName.toString() + " " + currentChatroom.toString())
 
+
     changeChatroom(currentChatroom, currentChatroomName)
     var start = false;
     //handles message from the server   
@@ -136,26 +144,8 @@
         var messageRecv = JSON.parse(event.data)
 
         var messageType = messageRecv.type || "";
-        if(messageType == "newChatroom")
-        {
-            var chatroomCodePrompt = document.getElementById("chatroomCodePrompt")
-            chatroomCodePrompt.textContent = "Your chatroom code is " + messageRecv.chatcode
-            checkSuccess()
-        }
-        else if (messageType == "user-chatroom")
-        {
-            chatrooms.push(messageRecv)
-            console.log(chatrooms)
-            updateUsers()
-            updateChatrooms()
-        }
-        else if (messageType == "login")
-        {
-            username = messageRecv.username
-            console.log("welcome " + username)
-            Initialize()
-        }
-        else if (messageType == "alert")
+       
+        if (messageType == "alert")
         {
             alert(messageRecv.message)
         }
@@ -166,22 +156,62 @@
             updateChatrooms()
             console.log(userStatus)
         }
-        else if (messageType == "removeActive")
-        {
-            userStatus = userStatus.filter(function(chatroom){
-                chatroom.username !== messageType.username
-            })
-            updateUsers()
-            updateChatrooms()
+        else if (messageType == "isAllowed"){ 
+            console.log("ping")
+            if(messageRecv.message == "Allowed"){
+                
+                return
+            }
+            else{
+                alert("You are not allowed to join this chatroom.")
+                window.location.href = "chat.html"
+                return
+            }
+        }
+        else if (messageType == "toApprove"){ 
+            
+           // generate in the message log a notification to the admin that there are users that wants to join 
+            console.log(messageRecv)
+            var toApprove = document.getElementById("approveList")
+            if (messageRecv.message == "No users to approve"){
+                toApprove.innerHTML = ""
+                const titleTag = document.getElementById("titleTag") 
+                titleTag.innerHTML = `<h4> ${messageRecv.message} </h4>`
+                return
+            }
+
+            
+
+            else if (messageRecv.message == "You are not an admin"){
+                toApprove.innerHTML = ""
+                const titleTag = document.getElementById("titleTag") 
+                titleTag.innerHTML = `<h4> ${messageRecv.message} </h4>`
+                return
+            }
+            var toApproveCount = toApprove.length 
+            var div = document.createElement("div");
+            div.classList.add("userListContent");
+            div.style.display = "flex";
+            div.style.justifyContent = "space-between";
+        
+            div.style.marginTop = "10px";
+            div.style.height = "20px";
+            div.style.width = "100%";
+            div.innerHTML = `
+                <h4>${messageRecv.username}</h4><button onclick="approveUser('${messageRecv.username}', '${messageRecv.chatcode}')">Approve</button>
+            `;
+            toApprove.appendChild(div);
+
+            const titleTag = document.getElementById("titleTag") 
+            titleTag.innerHTML = `<h4> ${messageRecv.message} </h4>`
+
         }
         else
         {
             // update message
             storedChatLog.push(messageRecv)
             updateMessages()
-        }
-
-        
+        } 
     });
 
     //initialize the chat app
@@ -189,20 +219,66 @@
     {
       
         document.getElementById("chat").style.display = "flex"
-
         start = true
+        JsonMessage = {"username": username, "type": "isAllowed", "chatcode": currentChatroom}
+        JsonMessage = JSON.stringify(JsonMessage)
+        if (socket.readyState === WebSocket.OPEN) {
+            socket.send(JsonMessage);
+        } else {
+            console.log('WebSocket is not open. Wait for it to open and then resend the message.');
+            // You could set up an event listener here to resend the message when the socket opens
+            socket.addEventListener('open', function (event) {
+                socket.send(JsonMessage);
+
+            });
+         
+        }
         // setTimeout(updateChatrooms, 300)
+    }
+
+
+    function approveUser(username, chatcode){
+        console.log(username + " " + chatcode)
+        JsonMessage = {"username": username,  "chatcode" : chatcode, "type": "approve"}
+        JsonMessage = JSON.stringify(JsonMessage)
+        if (socket.readyState === WebSocket.OPEN) {
+            socket.send(JsonMessage);
+        } else {
+            console.log('WebSocket is not open. Wait for it to open and then resend the message.');
+            // You could set up an event listener here to resend the message when the socket opens
+            socket.addEventListener('open', function (event) {
+                socket.send(JsonMessage);
+
+            });
+         
+        }
     }
 
     
     //change chatroom
-    function changeChatroom(chatroomCode, chatroomName){
+    async function changeChatroom(chatroomCode, chatroomName){
+        
+        
+
         currentChatroom = chatroomCode
         chatroom.innerHTML = chatroomName 
         chatroomCode11.innerHTML = " - " + chatroomCode 
         updateUsers()
         updateMessages()
         console.log("Ping")
+        JsonMessage = {"username": username,  "chatcode" : currentChatroom, "type": "getToApprove"}
+        JsonMessage = JSON.stringify(JsonMessage)
+        if (socket.readyState === WebSocket.OPEN) {
+            socket.send(JsonMessage);
+        } else {
+            console.log('WebSocket is not open. Wait for it to open and then resend the message.');
+            // You could set up an event listener here to resend the message when the socket opens
+            socket.addEventListener('open', function (event) {
+                socket.send(JsonMessage);
+
+            });
+         
+        }
     }
 
     //update message list for each chatroom
@@ -453,6 +529,7 @@
 
     document.getElementById("showUsers").addEventListener('click', function(){
         document.getElementById("activeUserList").classList.toggle("active")
+       
     })
 
     Initialize()
