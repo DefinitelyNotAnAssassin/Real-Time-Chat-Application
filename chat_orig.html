@@ -192,7 +192,6 @@
         else if (messageType == "user-chatroom")
         {
             chatrooms.push(messageRecv)
-            console.log(chatrooms)
             updateUsers()
             updateChatrooms()
         }
@@ -306,6 +305,7 @@
 
     const userList = document.getElementById("userList")
     function updateUsers() {
+        console.log("updating users")
         userList.innerHTML = ""
         chatrooms.forEach(users => {
             if(currentChatroom == users.chatcode)

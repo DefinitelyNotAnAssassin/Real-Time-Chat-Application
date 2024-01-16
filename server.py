@@ -189,20 +189,7 @@ async def handle(websocket, path):
 
                     print(f"[server]: creating user: {signupUsernames}")
 
-            elif message_type == "getChatroomUsers": 
-                print("getting chatroom users")
-                chatroom = message_data.get("chatcode", "")
-                chatroom_users = []
-                user_chatroom_record = [json.loads(user_chatrooms) for user_chatrooms in user_chatroom]
-                for uChatroom in user_chatroom_record:
-
-                    if(uChatroom['chatcode'] == chatroom):
-                        chatroom_users.append(json.dumps(uChatroom))
-                user_chatroomEntry = {"chatcode": chatroom, "type": "user-chatroom"}
-                print(chatroom_users)
-                print(user_chatroom_record)
-                await websocket.send(json.dumps(user_chatroomEntry))
-                
+            
             elif message_type == "createChatroom":
                 # create a chatroom and save it to chatroom list
                 chatroomName = message_data.get("chatroomName", "")
@@ -227,7 +214,25 @@ async def handle(websocket, path):
                 await websocket.send(json.dumps(newChatroomMessage))
 
                 await broadcast(json.dumps(user_chatroomEntry))
+                
+            elif message_type == "getChatroomUsers": 
+                 # send all past messages
+                loginUsernames = message_data.get("username", "")
+                await send_all_messages(websocket)
 
+                # send all user-chatroom connection
+                await send_all_chatroom(websocket)
+
+                # send all current active users
+                await send_all_active(websocket)
+
+                # send message to other user that you're online
+                yourActiveEntry = {"username": socketUsername, "type": "status"}
+                await broadcast(json.dumps(yourActiveEntry))
+
+                activeUsersEntry = {"username": loginUsernames, "type": "status"}
+                active_users.append(json.dumps(activeUsersEntry))
+                
             elif message_type == "joinChatroom":
                 chatroomCode =  message_data.get("chatcode", "")
 

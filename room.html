@@ -156,16 +156,14 @@
         {
             userStatus.push(messageRecv)
             updateUsers()
-            updateChatrooms()
             console.log(userStatus)
         }
         else if (messageType == "user-chatroom")
         {
             console.log("received")
             chatrooms.push(messageRecv)
-            console.log(chatrooms)
+   
             updateUsers()
-            updateChatrooms()
         }
 
         else if (messageType == "removeActive")
@@ -174,7 +172,6 @@
                 chatroom.username !== messageType.username
             })
             updateUsers()
-            updateChatrooms()
         }
         else if (messageType == "isAllowed"){ 
             if(messageRecv.message == "Allowed"){
@@ -243,8 +240,7 @@
         JsonMessage = JSON.stringify(JsonMessage)
         JsonMessage2 = {"username": username,  "chatcode" : currentChatroom, "type": "getToApprove"}
         JsonMessage2 = JSON.stringify(JsonMessage2)
-
-            
+        
       
         if (socket.readyState === WebSocket.OPEN) {
             socket.send(JsonMessage);
@@ -255,8 +251,8 @@
             socket.addEventListener('open', function (event) {
                 socket.send(JsonMessage);
                 socket.send(JsonMessage2)
-              
-                updateUsers()   
+       
+            
 
             });
          
@@ -352,7 +348,24 @@
 
    
     function updateUsers() {
-        console.log(chatrooms)
+        console.log(chatrooms.length)
+        if (chatrooms.length == 0){ 
+            console.log("ping")
+            JsonMessage3 = {"username": username,  "chatcode" : currentChatroom, "type": "getChatroomUsers"}
+            JsonMessage3 = JSON.stringify(JsonMessage3)
+            if (socket.readyState === WebSocket.OPEN) {
+                socket.send(JsonMessage3);
+            } else {
+                console.log('WebSocket is not open. Wait for it to open and then resend the message.');
+                // You could set up an event listener here to resend the message when the socket opens
+                socket.addEventListener('open', function (event) {
+                    socket.send(JsonMessage3);
+    
+                });
+             
+            }
+           
+        }
         userList.innerHTML = ""
         chatrooms.forEach(users => {
             if(currentChatroom == users.chatcode)
@@ -435,7 +448,6 @@
 
                 room.appendChild(roomP)
                 
-                chatroomList.appendChild(room);
             }
         });
     }
