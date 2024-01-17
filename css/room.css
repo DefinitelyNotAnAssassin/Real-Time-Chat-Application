@@ -7,28 +7,21 @@
 }
 
 
-body { 
-    color: white; 
-    background-image:  url("abstract.jpg"); 
-
-    
-}
-
 .title{ 
   background: transparent;
 }
+
 .chatLog{ 
     color: white; 
     background-image:  url("abstract.jpg");
     background-size: cover;
-    
 }
 
 
 .chatHeader{ 
-    background-color: transparent;
+    background-color: white;
     color: black; 
-    
+   
 }
 
 .chatroomList{ 
@@ -288,7 +281,7 @@ a {
 
 .messages .name p
 {
-    color:#999999;
+    color:black;
     padding: 0px 5px;
 }
 
@@ -300,6 +293,8 @@ a {
     padding: 6px 15px;
     width: fit-content;
     max-width: 60%;
+    padding-left: 10px; 
+    padding-right:10px;
 }
 
 .chatMsg
@@ -323,7 +318,7 @@ a {
 
 .userMsg .name p
 {
-    color:#999999;
+    color:black;
     padding: 0px 5px;
 }
 
@@ -331,8 +326,9 @@ a {
 {
     background-color: #0098ff;
     color: rgb(255, 255, 255);
-    border-radius: 15px;
-    padding: 6px 15px;
+    border-radius: 20px;
+    padding: 12px 30px;
+    
     /* max-width: 60%; */
 }
 
