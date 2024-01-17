@@ -71,30 +71,27 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Add Chatroom</h1>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-            <h1>Add Chatroom</h1>
+           
             <form id="AddChatroom" method="POST" action="">
                     <div class="form-field">
                         <label>Chatroom name</label>
-                        <input id="ChatroomName" type="text" name="taskName" placeholder="Chatroom name">
+                        <input class = "form-control" id="ChatroomName" type="text" name="taskName" placeholder="Chatroom name">
                     </div>
                 </div>
                 <div class="addWarning-text">
                     <p id="addWarning"></p>
                 </div>
                 <div class="form-button">
-                    <input id="addChatroomBtn" type="submit" name="AddChatroom" value="Create">
-                    <input type="button" value="Cancel" onclick="CloseAddChatroom()">        
+                    <input id="addChatroomBtn" class = "btn btn-primary" type="submit" name="AddChatroom" value="Create">
+                         
                 </div>
             </form>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary">Save changes</button>
-        </div>
+  
       </div>
     </div>
   </div>
@@ -106,29 +103,27 @@
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+              <h1 class="modal-title fs-5" id="exampleModalLabel">Join Chatroom</h1>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <h1>Join Chatroom</h1>
                 <form id="joinChatroom" method="POST" action="">
                         <div class="form-field">
                             <label>Chatroom code</label>
-                            <input id="chatroomCode" type="text" name="taskName" placeholder="Chatroom code">
+                            <input class ="form-control" id="chatroomCode" type="text" name="taskName" placeholder="Chatroom code">
                         </div>
                     </div>
                     <div class="addWarning-text">
                         <p id="joinWarning"></p>
                     </div>
                     <div class="form-button">
-                        <input id="" type="submit" name="AddChatroom" value="Join">
-                        <input type="button" value="Cancel" onclick="CloseJoinChatroom()">        
+                        <input class = "btn btn-primary" id="" type="submit" name="AddChatroom" value="Join">
+                               
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              <button type="button" class="btn btn-primary">Save changes</button>
+             
             </div>
           </div>
         </div>
@@ -159,7 +154,10 @@
                 <p id="chatroomName">Real Time Chat Application</p>
                 <p class= "aaa" id="chatroomCodess"></p>
             </h3>
-            <p class="icons2" id="showUsers"><i class='bx bx-dots-vertical-rounded'></i></p>
+            
+            <div class="">
+                <button onclick = "logout()" type = "submit" style = "margin-left: 10px; cursor: pointer;"><svg height="50px" width="30px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 304.588 304.588" xml:space="preserve" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g> <g> <g> <polygon style="fill:#010002;" points="134.921,34.204 134.921,54.399 284.398,54.399 284.398,250.183 134.921,250.183 134.921,270.384 304.588,270.384 304.588,34.204 "></polygon> </g> <g> <polygon style="fill:#010002;" points="150.27,223.581 166.615,239.931 254.26,152.286 166.615,64.651 150.27,80.979 210.013,140.733 0,140.733 0,163.838 210.008,163.838 "></polygon> </g> </g> </g> </g></svg></button>
+            </div>
         </div>
         <div class="chatroomContent" id="chatLog">
             <!--<div class="userMsg">
@@ -262,6 +260,7 @@
         }
         else if (messageType == "status")   
         {
+            console.log(messageRecv)
             userStatus.push(messageRecv)
             updateUsers()
             updateChatrooms()
@@ -358,6 +357,10 @@
                 }
             }
         });
+    }
+
+    function logout(){
+        window.location.href = "chat.html"
     }
 
     const userList = document.getElementById("userList")
@@ -534,7 +537,6 @@
             JsonMessage = JSON.stringify(JsonMessage)
             socket.send(JsonMessage);
 
-            CloseAddChatroom()
         }
     });
 
@@ -552,7 +554,6 @@
             JsonMessage = JSON.stringify(JsonMessage)
             socket.send(JsonMessage);
 
-            CloseJoinChatroom()
         }
         else
         {
@@ -561,19 +562,7 @@
     });
 
     //add chatroom success prompt
-    const successPrompt = document.getElementById("add-chatroom");
-    const successContent = document.getElementById("add-chatroom-content");
-
-    function checkSuccess() {
-        successPrompt.classList.toggle("active");
-        successContent.classList.toggle("active");
-    }
-
-    successPrompt.addEventListener("click", function() {
-        successPrompt.classList.toggle("active");
-        successContent.classList.toggle("active");
-    })
-
+  
     // login-signup js
     var x = document.getElementById("login");
     var y = document.getElementById("register");

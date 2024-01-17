@@ -140,7 +140,7 @@ async def handle(websocket, path):
                             yourActiveEntry = {"username": socketUsername, "type": "status"}
                             await broadcast(json.dumps(yourActiveEntry))
 
-                            activeUsersEntry = {"username": loginUsernames, "type": "status"}
+                            activeUsersEntry = {"username": socketUsername, "type": "status"}
                             active_users.append(json.dumps(activeUsersEntry))
                             print(f"current active users: {active_users}")
 
@@ -250,6 +250,8 @@ async def handle(websocket, path):
             elif message_type == "leaveRoom": 
                 print(message_data)
                 chatroomCode =  message_data.get("chatcode", "")
+                chatroomName = message_data.get("chatname", "")
+                print(chatroomName)
                 username = message_data.get("username", "")
                 print(chatroomCode, username)
                 sql = f"DELETE FROM `user_chatroom` WHERE `chatroomID` = '{chatroomCode}' AND `username` = '{username}'"
@@ -257,6 +259,7 @@ async def handle(websocket, path):
                 print(sql)
                 print("deleted")
                 mycursor.execute("SELECT * FROM `chatrooms`")
+                
 
                 chatroomsquery = mycursor.fetchall()
                 chatroomList.clear()
@@ -266,7 +269,20 @@ async def handle(websocket, path):
                 send_all_chatroom(websocket, chatroomList)
                 # remove the user from the chatroom
                 user_chatroom_entry = {"chatcode": chatroomCode,  "username": username, "type": "leaveRoom"}
+                
+                
                 await websocket.send(json.dumps(user_chatroom_entry))    
+                await websocket.send(json.dumps({"type": "update"}))
+                
+            elif message_type == "update": 
+                mycursor.execute("SELECT * FROM `chatrooms`")
+                chatroomsquery = mycursor.fetchall()
+                chatroomList.clear()
+                for chatroomsTuple in chatroomsquery:
+                    chatroomID, chatroomName = chatroomsTuple
+                    chatroomList.append(json.dumps({"chatcode": chatroomID, "chatname": chatroomName, "type": "chatroom"}))
+                send_all_chatroom(websocket, chatroomList)
+                print("updating")
                 await websocket.send(json.dumps({"type": "update"}))
                 
                 

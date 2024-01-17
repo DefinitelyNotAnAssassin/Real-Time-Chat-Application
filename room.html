@@ -199,13 +199,14 @@
         }
         else if (messageType == "status")
         {
+     
             userStatus.push(messageRecv)
             updateUsers()
             updateChatrooms()
         }
         else if (messageType == "user-chatroom")
         {
-            console.log("received")
+            console.log(messageRecv)
             chatrooms.push(messageRecv)
             updateUsers()
             updateChatrooms()
@@ -349,6 +350,7 @@
                 // You could set up an event listener here to resend the message when the socket opens
                 socket.addEventListener('open', function (event) {
                     socket.send(JsonMessage3);
+                    socket.send(JSON.stringify({"chatcode": currentChatroom, "username": username, "type": "update"}))
     
                 });
              
@@ -357,7 +359,10 @@
         }
         updateUsers()
         updateMessages()
-      
+        updateChatrooms()
+        chatLog.scrollTop = chatLog.scrollHeight;
+
+        
     }
 
     //update message list for each chatroom
@@ -480,9 +485,12 @@
                 var isSomeoneActive = false
                 chatrooms.forEach(user_rooms => {
                     if(rooms.chatcode == user_rooms.chatcode){
+                        console.log(rooms.chatcode, user_rooms.chatcode, userStatus)
                         if (user_rooms.username != username){
                             // alert("same" + rooms.chatcode + " " + user_rooms.chatcode + "in " + user_rooms.username)
+                    
                             userStatus.forEach(user_status => {
+                                
                                 if(user_rooms.username == user_status.username){
                                     isSomeoneActive = true
                                 }
@@ -537,7 +545,7 @@
     }
 
     function leaveRoom(){
-        JsonMessage = {"chatcode": currentChatroom, "username": username, "type": "leaveRoom"};
+        JsonMessage = {"chatcode": currentChatroom, "username": username, "chatname": currentChatroomName,"type": "leaveRoom"};
         socket.send(JSON.stringify(JsonMessage))
     }
 
