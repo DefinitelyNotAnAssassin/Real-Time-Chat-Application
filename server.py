@@ -5,7 +5,7 @@ import random
 import mysql.connector
 
 PORT = 8080
-SERVER = 'localhost'
+SERVER = '192.168.1.103'
 
 conn = mysql.connector.connect(
   host="localhost",
@@ -349,7 +349,9 @@ async def handle(websocket, path):
                             print("...not approved")
                             newChatroomMessage = {"type": "alert", "message": "Waiting for approval to join this chatroom"}
                             await websocket.send(json.dumps(newChatroomMessage))
-                            break
+                            newChatroomMessage = {"chatcode": chatroomCode, "chatname": chatroomName , "type": "user-chatroom"}
+                            await websocket.send(json.dumps(newChatroomMessage))
+                            
                         
                         
                         await broadcast(json.dumps(user_chatroomEntry))
@@ -407,6 +409,23 @@ async def handle(websocket, path):
                     await websocket.send(json.dumps(message))
                     
                 
+            elif message_type == "deleteRoom": 
+                chatcode = message_data.get("chatcode", "")
+                username = message_data.get("username", "")
+                print(chatcode, username)
+                # check if the user is admin
+                isAdmin = False
+                checkAdmin = f"SELECT * FROM `user_chatroom` WHERE `chatroomID` = '{chatcode}' AND `username` = '{username}' AND `role` = 'admin'"
+                print(checkAdmin)
+                mycursor.execute(checkAdmin)
+                result = mycursor.fetchall()
+                deleteRoom = f"DELETE FROM `chatrooms` WHERE `chatroomID` = {chatcode}"
+                mycursor.execute(deleteRoom)
+                chatroomList.clear()
+                user_chatroom.clear()
+                message_history.clear()
+                RetrieveData()
+                await websocket.send(json.dumps({"type": "update"}))
                 
             
             elif message_type == "getToApprove": 

@@ -62,7 +62,7 @@
         <div class="chatroomHeader">
             <h3>Chatrooms</h3>
         </div>
-        <div class="chatroomList" id="chatroomList">
+        <div class="chatroomList2" id="chatroomList">
             <!--<div class="chatroomListContent" onclick="changeChatroom(1, 'Chatroom 1')">
                 <h4>Chatroom 1</h4>
                 <p>Status: Inactive</p>
@@ -282,7 +282,7 @@
             if(rooms.username == username)
             {
                 const room = document.createElement('div');
-                room.classList.add("chatroomListContent")
+                room.classList.add("chatroomListContent2")
                 room.onclick = function () {
                     changeChatroom(rooms.chatcode, rooms.chatname)
                 }

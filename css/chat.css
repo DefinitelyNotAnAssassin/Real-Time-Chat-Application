@@ -6,6 +6,28 @@
     outline: none;
 }
 
+
+body { 
+    color: white; 
+    background-image:  url("pxfuel.jpg"); 
+    background-size: cover;
+}
+.chatLog{ 
+    color: white; 
+    background-image:  url("pxfuel.jpg");
+    background-size: cover;
+}
+
+.chatHeader{ 
+    background-color: white;
+    color: black; 
+   
+}
+
+.chatroomList{ 
+    color: black;
+}
+
 a, button 
 {
     all: unset;
@@ -146,6 +168,12 @@ a {
     max-width: 20%;
 }
 
+#chatroomName{ 
+    font-family: 'Righteous', sans-serif;
+    font-size: x-large;
+
+}
+
 .userList
 {
     background-color: var(--color1);
@@ -177,17 +205,31 @@ a {
     height: calc(100% - 56px);
 }
 
+.chatrooms{ 
+    background-color: white;
+    color: black; 
+}
+
+.chatroomListContent2{ 
+    padding: 12px;
+    border-bottom: solid 1px var(--border-color);
+    cursor: pointer;
+    color: white;
+    text-align: center;
+}
 .chatroomListContent
 {
     padding: 12px;
     border-bottom: solid 1px var(--border-color);
     cursor: pointer;
+    color: black;
+    text-align: center;
 }
 
 .chatroomListContent p, .activeUserContent p
 {   
     text-align: center;
-    color: #929292;
+    color: black;
     font-size: 14px;
     padding: 2px 0px;
     font-weight: bold;

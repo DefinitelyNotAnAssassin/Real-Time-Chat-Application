@@ -11,6 +11,9 @@ a, button
     all: unset;
 }
 
+.chatroomListContent2{ 
+    color: white;
+}
 
 :root
 {
