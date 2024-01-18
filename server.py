@@ -527,7 +527,14 @@ start_server = websockets.serve(handle, SERVER, PORT)
 print("SERVER: Starting...")
 print(f"SERVER: Listening on {SERVER}:{PORT}")
 
+async def main():
+    start_server = websockets.serve(handle, SERVER, PORT)
+    server = await start_server
+    await server.serve_forever()
+
+print("SERVER: Starting...")
+print(f"SERVER: Listening on {SERVER}:{PORT}")
+
 RetrieveData()
 
-asyncio.get_event_loop().run_until_complete(start_server)
-asyncio.get_event_loop().run_forever()
+asyncio.run(main())
