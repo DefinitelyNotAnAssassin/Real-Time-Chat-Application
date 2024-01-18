@@ -6,14 +6,16 @@
     outline: none;
 }
 
-
+.msgInput{ 
+    border: 1 px solid black !important;
+}
 .title{ 
   background: transparent;
 }
 
 .chatLog{ 
     color: white; 
-    background-image:  url("abstract.jpg");
+    background-image:  url("pxfuel.jpg");
     background-size: cover;
 }
 
@@ -299,12 +301,13 @@ a {
 
 .chatMsg
 {
-    display: flex;
+  display: flex;
     width: 100%;
-    padding: 5px;
+
     position: fixed;
     flex-direction: row;
     height: 60px;
+    margin-bottom: 5px !important;
 }
 
 .userMsg
@@ -332,10 +335,16 @@ a {
     /* max-width: 60%; */
 }
 
+.msgButton{ 
+   width: auto;
+   margin-left: 5px;
+   margin-bottom: 9px;
+}
 .msgInput
 {
-    width: 95%;
-    margin-top: 24px;
+    width: 75%;
+    margin-top: 10px;
+    margin-left: 10px;
     height: 30px;
     background-color: #eeeeee;
     border: none;
